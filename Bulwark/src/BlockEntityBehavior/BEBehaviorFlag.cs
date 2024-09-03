@@ -168,10 +168,10 @@ namespace Bulwark {
                 if (this.Stronghold.IsClaimed) {
 
                     List<BlockEntityContainer> cellars = new(4);
-                    if (this.Api.World.BlockAccessor.GetBlockEntity<BlockEntityContainer>(this.Pos + new BlockPos( 1, 0,  0)) is BlockEntityContainer cellarA) cellars.Add(cellarA);
-                    if (this.Api.World.BlockAccessor.GetBlockEntity<BlockEntityContainer>(this.Pos + new BlockPos(-1, 0,  0)) is BlockEntityContainer cellarB) cellars.Add(cellarB);
-                    if (this.Api.World.BlockAccessor.GetBlockEntity<BlockEntityContainer>(this.Pos + new BlockPos( 0, 0,  1)) is BlockEntityContainer cellarC) cellars.Add(cellarC);
-                    if (this.Api.World.BlockAccessor.GetBlockEntity<BlockEntityContainer>(this.Pos + new BlockPos( 0, 0, -1)) is BlockEntityContainer cellarD) cellars.Add(cellarD);
+                    if (this.Api.World.BlockAccessor.GetBlockEntity<BlockEntityContainer>(this.Pos + new BlockPos( 1, 0,  0, this.Pos.dimension)) is BlockEntityContainer cellarA) cellars.Add(cellarA);
+                    if (this.Api.World.BlockAccessor.GetBlockEntity<BlockEntityContainer>(this.Pos + new BlockPos(-1, 0,  0, this.Pos.dimension)) is BlockEntityContainer cellarB) cellars.Add(cellarB);
+                    if (this.Api.World.BlockAccessor.GetBlockEntity<BlockEntityContainer>(this.Pos + new BlockPos( 0, 0,  1, this.Pos.dimension)) is BlockEntityContainer cellarC) cellars.Add(cellarC);
+                    if (this.Api.World.BlockAccessor.GetBlockEntity<BlockEntityContainer>(this.Pos + new BlockPos( 0, 0, -1, this.Pos.dimension)) is BlockEntityContainer cellarD) cellars.Add(cellarD);
 
                    this.cellarExpectancy = 0f;
 
@@ -197,10 +197,10 @@ namespace Bulwark {
                     float targetSatiety = deltaTime / 86400f / this.Api.World.Calendar.SpeedOfTime / nowDurationPerSatiety;
 
                     BlockEntityContainer[] cellars = new BlockEntityContainer [4];
-                    cellars[0] = this.Api.World.BlockAccessor.GetBlockEntity<BlockEntityContainer>(this.Pos + new BlockPos( 1, 0,  0));
-                    cellars[1] = this.Api.World.BlockAccessor.GetBlockEntity<BlockEntityContainer>(this.Pos + new BlockPos(-1, 0,  0));
-                    cellars[2] = this.Api.World.BlockAccessor.GetBlockEntity<BlockEntityContainer>(this.Pos + new BlockPos( 0, 0,  1));
-                    cellars[3] = this.Api.World.BlockAccessor.GetBlockEntity<BlockEntityContainer>(this.Pos + new BlockPos( 0, 0, -1));
+                    cellars[0] = this.Api.World.BlockAccessor.GetBlockEntity<BlockEntityContainer>(this.Pos + new BlockPos( 1, 0,  0, this.Pos.dimension));
+                    cellars[1] = this.Api.World.BlockAccessor.GetBlockEntity<BlockEntityContainer>(this.Pos + new BlockPos(-1, 0,  0, this.Pos.dimension));
+                    cellars[2] = this.Api.World.BlockAccessor.GetBlockEntity<BlockEntityContainer>(this.Pos + new BlockPos( 0, 0,  1, this.Pos.dimension));
+                    cellars[3] = this.Api.World.BlockAccessor.GetBlockEntity<BlockEntityContainer>(this.Pos + new BlockPos( 0, 0, -1, this.Pos.dimension));
 
                     foreach(BlockEntityContainer cellar in cellars)
                         if (cellar != null)

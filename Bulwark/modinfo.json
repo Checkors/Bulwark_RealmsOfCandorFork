@@ -1,10 +1,10 @@
 {
     "type":  "code",
-    "modid": "bulwark",
-    "name":  "Bulwark",
-    "authors": [ "Lastelle" ],
-    "description": "A civilisation mod",
-    "version": "0.0.8",
+    "modid": "RoC_bulwark",
+    "name":  "Bulwark of Candor",
+    "authors": [ "Lastelle", "Cantos" ],
+    "description": "A civilisation mod, for a civilization server",
+    "version": "0.0.1",
     "dependencies": {
         "game": ""
     }
