@@ -2,7 +2,7 @@ using Vintagestory.API.Client;
 using Vintagestory.API.MathTools;
 
 
-namespace Bulwark {
+namespace RoCBulwark {
     public class VerticalFlagRenderer : IRenderer {
 
         protected readonly ICoreClientAPI api;

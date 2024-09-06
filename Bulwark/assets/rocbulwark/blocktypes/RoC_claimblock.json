@@ -1,0 +1,19 @@
+{
+    "code": "RoC_Claimblock",
+    "creativeinventory": {
+        "general": [ "*" ],
+        "RoCBulwark": [ "*" ]
+    },
+    "drawtype": "Cube",
+    "texture": {
+        "base": "block/rocblock"
+    },
+    "blockmaterial": "Metal",
+    "resistance": 3.5,
+    "sounds": {
+        "place": "game:block/anvil",
+        "walk": "game:walk/stone"
+    }
+
+
+}

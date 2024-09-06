@@ -7,7 +7,7 @@
 		},
 		"width":  3,
 		"height": 2,
-		"output": { "type": "block", "code": "bulwark:logisticpost-{metal}" }
+		"output": { "type": "block", "code": "RoCBulwark:logisticpost-{metal}" }
 	},
 	{
 		"ingredientPattern": "BAB,B_B",
@@ -17,7 +17,7 @@
 		},
 		"width":  3,
 		"height": 2,
-		"output": { "type": "block", "code": "bulwark:logisticpost-ruined" }
+		"output": { "type": "block", "code": "RoCBulwark:logisticpost-ruined" }
 	},
 	{
 		"ingredientPattern": "BAB,B_B",
@@ -27,7 +27,7 @@
 		},
 		"width":  3,
 		"height": 2,
-		"output": { "type": "block", "code": "bulwark:logisticpost-gold" }
+		"output": { "type": "block", "code": "RoCBulwark:logisticpost-gold" }
 	},
 	{
 		"ingredientPattern": "BAB,B_B",
@@ -37,6 +37,6 @@
 		},
 		"width":  3,
 		"height": 2,
-		"output": { "type": "block", "code": "bulwark:logisticpost-silver" }
+		"output": { "type": "block", "code": "RoCBulwark:logisticpost-silver" }
 	}
 ]

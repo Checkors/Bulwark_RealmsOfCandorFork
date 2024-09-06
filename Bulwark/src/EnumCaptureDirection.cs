@@ -1,4 +1,4 @@
-namespace Bulwark {
+namespace RoCBulwark {
     public enum EnumCaptureDirection {
         Claim   = +1,
         Unclaim = -1,

@@ -6,7 +6,7 @@ using Vintagestory.API.Datastructures;
 using Vintagestory.API.Util;
 
 
-namespace Bulwark {
+namespace RoCBulwark {
     public class BlockBehaviorFlag : BlockBehavior {
 
         //=======================

@@ -8,6 +8,6 @@
 		},
 		"width":  3,
 		"height": 3,
-		"output": { "type": "block", "code": "bulwark:gabion-{wood}-construct1", "quantity": 8  }
+		"output": { "type": "block", "code": "RoCBulwark:gabion-{wood}-construct1", "quantity": 8  }
 	}
 ]

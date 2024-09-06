@@ -9,7 +9,7 @@
 		},
 		"width":  2,
 		"height": 3,
-		"output": { "type": "block", "code": "bulwark:flagpole-fort" }
+		"output": { "type": "block", "code": "RoCBulwark:flagpole-fort" }
 	},
 	{
 		"ingredientPattern": "AB,CB,DB",
@@ -21,6 +21,6 @@
 		},
 		"width":  2,
 		"height": 3,
-		"output": { "type": "block", "code": "bulwark:flagpole-city" }
+		"output": { "type": "block", "code": "RoCBulwark:flagpole-city" }
 	}
 ]

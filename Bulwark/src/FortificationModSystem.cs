@@ -7,7 +7,7 @@ using Vintagestory.API.MathTools;
 using Vintagestory.API.Common.Entities;
 
 
-namespace Bulwark
+namespace RoCBulwark
 {
     public class FortificationModSystem : ModSystem
     {
@@ -141,7 +141,7 @@ namespace Bulwark
             if (blockSel != null)
             {
                 string blockname = api.World.BlockAccessor.GetBlock(blockSel.Position).GetPlacedBlockName(api.World, blockSel.Position);
-                api.Logger.Debug("[Bulwark_BCA] {0} attempted place/remove {1}, at position {2}", byPlayer.PlayerName.ToString(), blockname, blockSel.Position.ToString());
+                api.Logger.Debug("[RoCBulwark_BCA] {0} attempted place/remove {1}, at position {2}", byPlayer.PlayerName.ToString(), blockname, blockSel.Position.ToString());
                 if (!this.HasPrivilege(byPlayer, blockSel, out _))
                 {
                     api.Logger.Debug("No Access");

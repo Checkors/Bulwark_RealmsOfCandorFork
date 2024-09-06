@@ -3,8 +3,8 @@ using Vintagestory.API.Datastructures;
 using Vintagestory.GameContent;
 
 
-namespace Bulwark {
-    public class BulwarkModSystem : ModSystem {
+namespace RoCBulwark {
+    public class RoCBulwarkModSystem : ModSystem {
 
         public static float ClaimDurationPerSatiety     { get; private set; }
         public static int   UndergroundClaimLimit       { get; private set; }
@@ -20,10 +20,10 @@ namespace Bulwark {
             api.RegisterBlockEntityBehaviorClass("FlagEntity", typeof(BlockEntityBehaviorFlag));
             api.RegisterBlockEntityBehaviorClass("LogisticEntity", typeof(BlockEntityBehaviorLogistic));
 
-            JsonObject modConfig = api.LoadModConfig("BulwarkModConfig.json");
-            BulwarkModSystem.ClaimDurationPerSatiety     = modConfig?["claimDurationPerSatiety"]?.AsFloat(0.0025f) ?? 0.0025f;
-            BulwarkModSystem.UndergroundClaimLimit       = modConfig?["undergroundClaimLimit"]?.AsInt(8)           ?? 8;
-            BulwarkModSystem.AllStoneBlockRequirePickaxe = modConfig?["allStoneBlockRequirePickaxe"]?.AsBool(true) ?? true;
+            JsonObject modConfig = api.LoadModConfig("RoCRoCBulwarkModConfig.json");
+            RoCBulwarkModSystem.ClaimDurationPerSatiety     = modConfig?["claimDurationPerSatiety"]?.AsFloat(0.0025f) ?? 0.0025f;
+            RoCBulwarkModSystem.UndergroundClaimLimit       = modConfig?["undergroundClaimLimit"]?.AsInt(8)           ?? 8;
+            RoCBulwarkModSystem.AllStoneBlockRequirePickaxe = modConfig?["allStoneBlockRequirePickaxe"]?.AsBool(true) ?? true;
 
         } // void ..
         
@@ -31,7 +31,7 @@ namespace Bulwark {
         public override void AssetsFinalize(ICoreAPI api) {
             base.AssetsFinalize(api);
             foreach (Block block in api.World.Blocks) {
-                if (BulwarkModSystem.AllStoneBlockRequirePickaxe
+                if (RoCBulwarkModSystem.AllStoneBlockRequirePickaxe
                     && block.BlockMaterial      == EnumBlockMaterial.Stone
                     && block.Replaceable        <= 200
                     && block.CollisionBoxes     != null

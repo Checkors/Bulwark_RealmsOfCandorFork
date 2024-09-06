@@ -11,7 +11,7 @@ using Vintagestory.API.Server;
 using Vintagestory.GameContent;
 
 
-namespace Bulwark {
+namespace RoCBulwark {
     public class BlockEntityBehaviorFlag : BlockEntityBehavior {
 
         //=======================
@@ -80,7 +80,7 @@ namespace Bulwark {
                 this.Banner?.ResolveBlockOrItem(this.Api.World);
                 if (this.Banner != null && this.Api is ICoreClientAPI client) {
 
-                    client.Tesselator.TesselateShape(this.Banner.Item, Shape.TryGet(client, "bulwark:shapes/flag/banner.json"), out MeshData meshData);
+                    client.Tesselator.TesselateShape(this.Banner.Item, Shape.TryGet(client, "RoCBulwark:shapes/flag/banner.json"), out MeshData meshData);
                     this.renderer = new FlagRenderer(client, meshData, this.Pos, this, this.BlockBehavior.PoleTop, this.BlockBehavior.PoleBottom);
                     client.Event.RegisterRenderer(this.renderer, EnumRenderStage.Opaque, "flag");
                         
@@ -182,7 +182,7 @@ namespace Bulwark {
                                     if (itemStack.Collectible?.NutritionProps is FoodNutritionProperties foodNutrition)
                                         this.cellarExpectancy += foodNutrition.Satiety
                                             * itemStack.StackSize
-                                            * (BulwarkModSystem.ClaimDurationPerSatiety * (1f + this.BlockBehavior.ExpectancyBonus));
+                                            * (RoCBulwarkModSystem.ClaimDurationPerSatiety * (1f + this.BlockBehavior.ExpectancyBonus));
 
                 } // if ..
             } // void ..
@@ -191,7 +191,7 @@ namespace Bulwark {
             private void UpdateCellar(float deltaTime) {
                 if (this.Stronghold.IsClaimed) {
 
-                    float nowDurationPerSatiety = BulwarkModSystem.ClaimDurationPerSatiety * (1f + this.BlockBehavior.ExpectancyBonus);
+                    float nowDurationPerSatiety = RoCBulwarkModSystem.ClaimDurationPerSatiety * (1f + this.BlockBehavior.ExpectancyBonus);
 
                     float satiety       = 0f;
                     float targetSatiety = deltaTime / 86400f / this.Api.World.Calendar.SpeedOfTime / nowDurationPerSatiety;
@@ -265,7 +265,7 @@ namespace Bulwark {
                         if (this.Api is ICoreClientAPI client) {
                         
                             this.renderer?.Dispose();
-                            client.Tesselator.TesselateShape(this.Banner.Item, Shape.TryGet(client, "bulwark:shapes/flag/banner.json"), out MeshData meshData);
+                            client.Tesselator.TesselateShape(this.Banner.Item, Shape.TryGet(client, "RoCBulwark:shapes/flag/banner.json"), out MeshData meshData);
                             this.renderer = new FlagRenderer(client, meshData, this.Pos, this, this.BlockBehavior.PoleTop, this.BlockBehavior.PoleBottom);
                             client.Event.RegisterRenderer(this.renderer, EnumRenderStage.Opaque, "flag");
 
@@ -283,7 +283,7 @@ namespace Bulwark {
 
                 if (this.CapturedPercent == 1f) {
                     if (!this.Stronghold.IsClaimed)
-                        if (this.Api.World.BlockAccessor.GetTerrainMapheightAt(this.Pos) - this.Pos.Y <= BulwarkModSystem.UndergroundClaimLimit) {
+                        if (this.Api.World.BlockAccessor.GetTerrainMapheightAt(this.Pos) - this.Pos.Y <= RoCBulwarkModSystem.UndergroundClaimLimit) {
                             if (this.Api.ModLoader.GetModSystem<FortificationModSystem>().TryRegisterStronghold(this.Stronghold)) {
 
                                 this.cellarExpectancy = GameMath.Max(this.cellarExpectancy, 0.2f);

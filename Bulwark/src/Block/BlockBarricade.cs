@@ -3,7 +3,7 @@ using Vintagestory.API.Common;
 using Vintagestory.API.MathTools;
 using Vintagestory.GameContent;
 
-namespace Bulwark {
+namespace RoCBulwark {
     public class BlockBarricade : Block {
 
         //=======================

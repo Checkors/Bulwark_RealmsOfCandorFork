@@ -4,7 +4,7 @@ using Vintagestory.API.MathTools;
 using System;
 
 
-namespace Bulwark {
+namespace RoCBulwark {
     public class FlagRenderer : IRenderer {
 
         protected readonly ICoreClientAPI api;

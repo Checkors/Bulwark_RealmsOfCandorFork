@@ -23,7 +23,7 @@
     },
 	"creativeinventory": {
 		"general": ["*-construct1"],
-		"bulwark": ["*-construct1"]
+		"RoCBulwark": ["*-construct1"]
 	},
 	"shape": { "base": "barricade/gabion/{state}" },
 	"blockmaterial": "wood",

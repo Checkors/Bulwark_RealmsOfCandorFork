@@ -1,4 +1,4 @@
-namespace Bulwark {
+namespace RoCBulwark {
     public enum EnumUnclaimCause {
         Player,
         EmptyCellar,
