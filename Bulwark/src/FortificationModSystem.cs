@@ -142,10 +142,10 @@ namespace RoCBulwark
             {
                 string blockname = api.World.BlockAccessor.GetBlock(blockSel.Position).GetPlacedBlockName(api.World, blockSel.Position);
                 api.Logger.Debug("[RoCBulwark_BCA] {0} attempted place/remove {1}, at position {2}", byPlayer.PlayerName.ToString(), blockname, blockSel.Position.ToString());
-                if (!this.HasPrivilege(byPlayer, blockSel, out _))
+                if (!(this.HasPrivilege(byPlayer, blockSel, out _) || byPlayer.WorldData.CurrentGameMode == EnumGameMode.Creative))
                 {
                     api.Logger.Debug("No Access");
-                    claimant = null;
+                    claimant = Lang.Get(byPlayer.LanguageCode,"stronghold-noaccess");
                     return false;
                 }
                 else
@@ -296,6 +296,7 @@ namespace RoCBulwark
 
                     area = stronghold;
 
+                    if (stronghold.contested) return false;
                     if (stronghold.PlayerUID == null) return true;
                     if (stronghold.PlayerUID == byPlayer.PlayerUID) return true;
                     if (!(byPlayer.Groups?.Any(group => group.GroupUid == stronghold.GroupUID) ?? false))

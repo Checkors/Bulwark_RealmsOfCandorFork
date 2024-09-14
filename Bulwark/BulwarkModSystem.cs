@@ -1,5 +1,6 @@
 ﻿using Vintagestory.API.Common;
 using Vintagestory.API.Datastructures;
+using Vintagestory.API.Server;
 using Vintagestory.GameContent;
 
 
@@ -17,8 +18,13 @@ namespace RoCBulwark {
             api.RegisterBlockClass("BlockBarricade", typeof(BlockBarricade));
             api.RegisterBlockBehaviorClass("Flag", typeof(BlockBehaviorFlag));
             api.RegisterBlockBehaviorClass("Logistic", typeof(BlockBehaviorLogistic));
+
             api.RegisterBlockEntityBehaviorClass("FlagEntity", typeof(BlockEntityBehaviorFlag));
             api.RegisterBlockEntityBehaviorClass("LogisticEntity", typeof(BlockEntityBehaviorLogistic));
+
+            // RoC Claim Blocks
+            api.RegisterBlockBehaviorClass("Claimblock", typeof(BlockBehaviorClaimblock));
+            api.RegisterBlockEntityBehaviorClass("ClaimblockEntity", typeof(BlockEntityBehaviorClaimblock));
 
             JsonObject modConfig = api.LoadModConfig("RoCRoCBulwarkModConfig.json");
             RoCBulwarkModSystem.ClaimDurationPerSatiety     = modConfig?["claimDurationPerSatiety"]?.AsFloat(0.0025f) ?? 0.0025f;

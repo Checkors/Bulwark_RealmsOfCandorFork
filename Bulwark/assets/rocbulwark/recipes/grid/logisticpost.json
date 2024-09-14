@@ -1,13 +1,26 @@
 [
 	{
+		"enabled": false,
 		"ingredientPattern": "BAB,B_B",
 		"ingredients": {
-			"A": { "type": "item", "code": "game:spear-generic-*", "name": "metal", "allowedVariants": ["copper", "tinbronze", "bismuthbronze", "blackbronze"]},
-			"B": { "type": "item", "code": "game:stick", "quantity": 3 }
+			"A": {
+				"type": "item",
+				"code": "game:spear-generic-*",
+				"name": "metal",
+				"allowedVariants": [ "copper", "tinbronze", "bismuthbronze", "blackbronze" ]
+			},
+			"B": {
+				"type": "item",
+				"code": "game:stick",
+				"quantity": 3
+			}
 		},
-		"width":  3,
+		"width": 3,
 		"height": 2,
-		"output": { "type": "block", "code": "RoCBulwark:logisticpost-{metal}" }
+		"output": {
+			"type": "block",
+			"code": "RoCBulwark:logisticpost-{metal}"
+		}
 	},
 	{
 		"ingredientPattern": "BAB,B_B",

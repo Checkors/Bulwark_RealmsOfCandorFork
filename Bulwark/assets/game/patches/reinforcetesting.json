@@ -1,0 +1,32 @@
+[
+    {
+        "file": "game:itemtypes/resource/ingot.json",
+        "op": "remove",
+        "path": "/attributes/reinforcementStrengthByType",
+        "value": "*"
+    },
+
+    {
+        "file": "game:itemtypes/resource/metalnailsandstrips.json",
+        "op": "replace",
+        "path": "/attributes/reinforcementStrengthByType",
+        "value": {
+            "*-copper": 300,
+            "*-tinbronze": 600,
+            "*-bismuthbronze": 600,
+            "*-blackbronze": 800,
+            "*-iron": 1600,
+            "*-meteoriciron": 2000,
+            "*-steel": 2400,
+            "*-gold": 50,
+            "*-silver": 200
+        }
+    },
+
+    {
+        "file": "game:itemtypes/resource/mortar.json",
+        "op": "addmerge",
+        "path": "/attributes/reinforcementStrength",
+        "value": 200
+    }
+]

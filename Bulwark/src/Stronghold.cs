@@ -17,7 +17,8 @@ namespace RoCBulwark {
             
             public string Name;
             public Cuboidi Area;
-            public BlockPos Center;
+            public Cuboidi CaptureArea;
+            public BlockPos Center;    
 
             public string PlayerUID;
             public string PlayerName;
@@ -29,6 +30,7 @@ namespace RoCBulwark {
             
             public HashSet<Entity> BesiegingEntities = new();
             public float SiegeIntensity;
+            public bool contested;
 
             internal long? UpdateRef;
             
