@@ -6,6 +6,7 @@ using Vintagestory.API.MathTools;
 using Vintagestory.API.Server;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common.Entities;
+using Vintagestory.GameContent;
 
 
 namespace RoCBulwark {
@@ -86,6 +87,18 @@ namespace RoCBulwark {
 
             } // void ..
 
+        public void ClaimGroup(int groupUID)
+        {
+            if (this.Api is ICoreServerAPI Sapi && this.Name is string claimName)
+            {
+                this.GroupName = Sapi.Groups.PlayerGroupsById[groupUID].Name;
+                Sapi.SendMessageToGroup(
+                    groupUID,
+                    Lang.Get("{0} now leagues with {1}", claimName, this.GroupName),
+                    EnumChatType.Notification
+                ); // ..
+            }
+        } // void ..
 
             public void ClaimGroup(PlayerGroup group) {
 
@@ -145,6 +158,47 @@ namespace RoCBulwark {
                 
                 } // if ..
             } // void ..
+              //---------
+              // M A I N
+              //---------
+
+        public int AttemptTakeover(IPlayer attacker)
+        {
+            int retAttackGroupUID = -1;
+            ICoreServerAPI sapi = Api as ICoreServerAPI;
+            if (sapi != null)
+            {
+                retAttackGroupUID = int.Parse(sapi.PlayerData.PlayerDataByUid[attacker.PlayerUID].CustomPlayerData["CaptureGroup"]);
+            }
+
+            if (this.Api is ICoreServerAPI Sapi)
+            {
+                
+                string attackGroupUIDString;
+                if (Sapi.PlayerData.PlayerDataByUid[attacker.PlayerUID].CustomPlayerData.TryGetValue("CaptureGroup", out attackGroupUIDString))
+                {
+                    if (int.Parse(attackGroupUIDString) != -1)
+                    {
+                        retAttackGroupUID = int.Parse(attackGroupUIDString);
+                        Sapi.SendMessageToGroup(retAttackGroupUID, Lang.Get("RoCBulwark:stronghold-groupstartcapture", (this.Name != null ? this.Name : this.Center.AsVec3i.XZ)), EnumChatType.Notification);
+
+                    }
+                }
+                else retAttackGroupUID = -1;
+
+                Sapi.SendMessage(attacker, GlobalConstants.InfoLogChatGroup, Lang.Get("RoCBulwark:stronghold-startcapture", (this.Name != null ? this.Name : this.Center.AsVec3i.XZ)), EnumChatType.Notification);
+
+                if (this.IsClaimed)
+                {
+                    Sapi.SendMessage(Sapi.World.PlayerByUid(this.PlayerUID), GlobalConstants.InfoLogChatGroup, Lang.Get("RoCBulwark:stronghold-losingclaim", (this.Name != null ? this.Name : this.Center.AsVec3i.XZ)), EnumChatType.Notification);
+                    if (this.GroupUID != null) Sapi.SendMessageToGroup(this.GroupUID.Value, Lang.Get("RoCBulwark:stronghold-grouplosingclaim", (this.Name != null ? this.Name : this.Center.AsVec3i.XZ)), EnumChatType.Notification);
+
+                }
+                return retAttackGroupUID;
+            }
+            return retAttackGroupUID;
+        }
+            
 
 
             //---------

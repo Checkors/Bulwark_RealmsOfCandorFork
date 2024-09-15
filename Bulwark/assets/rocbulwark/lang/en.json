@@ -7,7 +7,7 @@
     "{0} is currently being besieged by a small band": "{0} is currently being besieged by a small band",
     "{0} is currently being besieged by a large band": "{0} is currently being besieged by a large band",
     "{0} is under attack!": "{0} is under attack!",
-    "One of your claim is under attack!": "One of your claim is under attack!",
+    "One of your claim is under attack!": "One of your claims is under attack!",
     "{0} has been captured!": "{0} has been captured!",
     "One of your claim has been captured!": "One of your claim has been captured!",
     "{0} has run out of food!": "{0} has run out of food!",
@@ -27,7 +27,21 @@
     "Ruins of {0}": "Ruins of {0}",
     "stronghold-noaccess": "You can't do that here!",
 
-    "RoCBulwark:block-claimblock-homestead": "Homestead Claimnlock",
+    "RoCBulwark:capturegroup-notingroup": "You're not in the Group {0} and it cannot be your capture group!",
+    "RoCBulwark:capturegroup-nosuchgroup": "That group doesn't exist!",
+    "RoCBulwark:capturegroup-setsuccess": "Sucessfully set capture group to {0}",
+    "RoCBulwark:capturegroup-current": "Your current capture group is {0}",
+    "RoCBulwark:capturegroup-nosetgroup": "You don't have a set capture group.",
+
+    "RoCBulwark:stronghold-groupstartcapture": "We have began to capture {0}!",
+    "RoCBulwark:stronghold-startcapture": "You start to capture {0}!",
+    "RoCBulwark:stronghold-grouplosingclaim": "We are losing our claim on {0}!",
+    "RoCBulwark:stronghold-losingclaim": "You are losing your claim on {0}!",
+
+    "RoCBulwark:stronghold-groupreclaim": "We have regained hold of {0}!",
+    "RoCBulwark:stronghold-reclaim": "You we have regained hold of {0}!",
+
+    "RoCBulwark:block-claimblock-homestead": "Homestead Claimblock",
     "RoCBulwark:block-claimblock-hamlet": "Hamlet Claimblock",
     "RoCBulwark:block-claimblock-town": "Town Claimblock",
     "RoCBulwark:block-claimblock-fort": "Fort Claimblock",

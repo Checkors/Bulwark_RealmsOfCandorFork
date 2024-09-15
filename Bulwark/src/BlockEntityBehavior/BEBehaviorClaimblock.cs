@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
 using Vintagestory.API.Client;
@@ -22,11 +23,11 @@ namespace RoCBulwark {
             
             //public ItemStack Banner      { get; protected set; } Skipping banners for a more "gamey" system
             public float CapturedPercent { get; protected set; }
-
+            
             private int captureRadius;
-        private float trueCaptureRadius;
+            private float trueCaptureRadius;
 
-        protected float TargetPercent => this.captureDirection switch {
+            protected float TargetPercent => this.captureDirection switch {
                 EnumCaptureDirection.Claim   => 1f,
                 EnumCaptureDirection.Unclaim => 0f,
                 _ => this.Stronghold.IsClaimed
@@ -48,6 +49,7 @@ namespace RoCBulwark {
 
 
             protected IPlayer              capturedBy;
+            protected int                   capturedByGroup;
             protected EnumCaptureDirection captureDirection;
             protected float                captureDuration;
 
@@ -59,7 +61,7 @@ namespace RoCBulwark {
             private long? captureRef;
             private long? computeRef;
             private long? cellarRef;
-
+            
 
         //===============================
         // I N I T I A L I Z A T I O N S
@@ -80,7 +82,7 @@ namespace RoCBulwark {
 
                 int worldheight = api.World.BlockAccessor.MapSizeY;
                 this.Stronghold.Area   = new Cuboidi( // Defines Stronghold area, protection radius defined in block json.
-                    this.Pos.AsVec3i - new Vec3i(protectionRadius, 0, protectionRadius), //Defines negative corner coordinate from center
+                    this.Pos.AsVec3i - new Vec3i(protectionRadius, this.Pos.Y, protectionRadius), //Defines negative corner coordinate from center
                     this.Pos.AsVec3i + new Vec3i(protectionRadius, worldheight, protectionRadius) // Defines positive corner coordinate from center
                 );
 
@@ -104,7 +106,7 @@ namespace RoCBulwark {
              */
 
 
-            this.updateRef  = api.Event.RegisterGameTickListener(this.Update, 50);
+                this.updateRef  = api.Event.RegisterGameTickListener(this.Update, 50);
                 this.computeRef = api.Event.RegisterGameTickListener(this.ComputeCellar, 1000);
                 this.cellarRef  = api.Event.RegisterGameTickListener(this.UpdateCellar, 6000);
 
@@ -249,7 +251,7 @@ namespace RoCBulwark {
                 this.CapturedPercent += GameMath.Clamp(this.TargetPercent - this.CapturedPercent, -deltaTime / this.captureDuration, deltaTime / this.captureDuration);
                 if (this.CapturedPercent == 0f && this.Stronghold.IsClaimed)
                 {
-                    Api.Logger.Debug(" \"void Update\" function condition pass, unclaim");
+                    //Api.Logger.Debug(" \"void Update\" function condition pass, unclaim");
 
                     EnumUnclaimCause unclaimCause = this.cellarExpectancy == 0f
                             ? EnumUnclaimCause.EmptyCellar
@@ -270,64 +272,52 @@ namespace RoCBulwark {
             } // void ..
 
 
-            public void TryStartCapture(IPlayer byPlayer) {
+        public void TryStartCapture(IPlayer byPlayer) {
 
-                if (byPlayer == null) return; //If there's no player, do nothing
+            if (byPlayer == null) return; //If there's no player, do nothing
 
-                if (!(this.Api.World.BlockAccessor.GetTerrainMapheightAt(this.Pos) - this.Pos.Y <= RoCBulwarkModSystem.UndergroundClaimLimit)) // If the flag is underground, do nothing.
-                {
-                    IServerPlayer serverPlayer = byPlayer as IServerPlayer;
-                    if (serverPlayer != null) serverPlayer.SendIngameError("stronghold-undergroundflag");
-                    return;
-                }
+            if (!(this.Api.World.BlockAccessor.GetTerrainMapheightAt(this.Pos) - this.Pos.Y <= RoCBulwarkModSystem.UndergroundClaimLimit)) // If the flag is underground, do nothing.
+            {
+                IServerPlayer serverPlayer = byPlayer as IServerPlayer;
+                if (serverPlayer != null) serverPlayer.SendIngameError("stronghold-undergroundflag");
+                return;
+            }
 
-                if (this.Stronghold.PlayerUID == byPlayer.PlayerUID) return; //If the player who owns it is trying to capture, do nothing.
+            if (this.Stronghold.PlayerUID == byPlayer.PlayerUID) return; //If the player who owns it is trying to capture, do nothing.
 
-                if (this.Stronghold.GroupUID.HasValue) //If the stronghold has a group 0->
-                {
-                    if (byPlayer.GetGroup(this.Stronghold.GroupUID.Value) != null) return; // 0-> And if the player has the same group as the stronghold group, do nothing.
-                    // *IMPLEMENT* Stronghold transfering via command.
-                };
+            if (this.Stronghold.GroupUID.HasValue) //If the stronghold has a group 0->
+            {
+                if (byPlayer.GetGroup(this.Stronghold.GroupUID.Value) != null) return; // 0-> And if the player has the same group as the stronghold group, do nothing.
+                // *IMPLEMENT* Stronghold transfering via command.
+            };
+
+            Api.Logger.Debug(" \"tryStartCapture\" {0} at {1}, current owner: {2}, ref {3}", byPlayer.PlayerName, byPlayer.Entity.Pos.XYZInt, this.capturedBy?.PlayerName, captureRef != null); //Debug print
                 
-                // DEBUG LOGGER
-                //Api.Logger.Debug(" \"tryStartCapture\" {0} at {1}, current owner: {2}, ref {3}", byPlayer.PlayerName, byPlayer.Entity.Pos.XYZInt, this.capturedBy?.PlayerName, captureRef != null);
+            if (this.captureRef == null && this.capturedBy == null) { 
                 
-                if (this.captureRef == null && this.capturedBy == null) { // If not currently being captured, start capturing
-
-                //Api.Logger.Debug("FIRST CONDITION: {0} at {1}", byPlayer.PlayerName, byPlayer.Entity.Pos.XYZInt);
-                    //this.CapturedPercent = 0.99f;
-                    this.Stronghold.contested = true;
-                    this.capturedBy = byPlayer;
-                    this.captureRef = this.Api.Event.RegisterGameTickListener(this.CaptureUpdate, 200);
-                    this.Blockentity.MarkDirty();
+            // If not currently being captured, start capturing
+            // Api.Logger.Debug("FIRST CONDITION: {0} at {1}", byPlayer.PlayerName, byPlayer.Entity.Pos.XYZInt); //Debug print
 
 
-
-                /* Deprecated flag code, no flag for claim blocks.
-                 * if (this.Banner == null
-                    && byPlayer.InventoryManager.ActiveHotbarSlot.CanTake()
-                    && (byPlayer.InventoryManager.ActiveHotbarSlot.Itemstack?.Collectible.Code.Path.Contains("cloth-") ?? false)
-                ) {
-
-                    //this.Banner = this.capturedBy.InventoryManager.ActiveHotbarSlot.TakeOut(1);
-                    this.capturedBy.InventoryManager.ActiveHotbarSlot.MarkDirty();
+                this.Stronghold.contested = true;
+                this.capturedBy = byPlayer;
+                if(Api.Side == EnumAppSide.Server) this.capturedByGroup = this.Stronghold.AttemptTakeover(this.capturedBy);
+                this.captureRef = this.Api.Event.RegisterGameTickListener(this.CaptureUpdate, 200);
+                this.Blockentity.MarkDirty();
 
 
-                    if (this.Api is ICoreClientAPI client) {
+                
 
-                        this.renderer?.Dispose();
-                        client.Tesselator.TesselateShape(this.Banner.Item, Shape.TryGet(client, "RoCBulwark:shapes/flag/banner.json"), out MeshData meshData);
-                       this.renderer = new FlagRenderer(client, meshData, this.Pos, this, this.BlockBehavior.PoleTop, this.BlockBehavior.PoleBottom);
-                       client.Event.RegisterRenderer(this.renderer, EnumRenderStage.Opaque, "flag");
-
-                    } // if ..
-                } // if .. */
-            } // if ..
-        } // void ..
+        } // if ..
+    } // void ..
 
 
         private void CaptureUpdate(float deltaTime) {
             if (Api.Side == EnumAppSide.Server) { // Serverside updates only.
+                if (this.capturedByGroup == -1)
+                {
+
+                }
                 if (this.capturedBy != null) {
                     IPlayer[] playersAround = Api.World.GetPlayersAround(this.Pos.ToVec3d(), trueCaptureRadius, trueCaptureRadius);
                     List<IPlayer> attackers = new List<IPlayer>();
@@ -345,7 +335,7 @@ namespace RoCBulwark {
                                     Api.Logger.Debug("C, DEF: {0}", playersAround[i].PlayerName);
                                     defenders.Add(playersAround[i]);
                                 }
-                                else if (playersAround[i] == this.capturedBy)
+                                else if (playersAround[i] == this.capturedBy || (playersAround[i].GetGroup(this.capturedByGroup) != null))
                                 {
                                     Api.Logger.Debug("C, ATK: {0}", playersAround[i].PlayerName);
                                     attackers.Add(playersAround[i]);
@@ -353,7 +343,7 @@ namespace RoCBulwark {
                             } // Claimed Capture
                             else
                             {
-                                if (playersAround[i] == this.capturedBy)
+                                if (playersAround[i] == this.capturedBy || (playersAround[i].GetGroup(this.capturedByGroup) != null))
                                 {
                                     Api.Logger.Debug("U DEF: {0}", playersAround[i].PlayerName);
                                     defenders.Add(playersAround[i]);
@@ -369,7 +359,7 @@ namespace RoCBulwark {
 
                     // Capture direction logic. If attackers are greater than defenders, unclaim point,
                     this.captureDirection = attackers.Count > defenders.Count ? EnumCaptureDirection.Unclaim : (defenders.Count == attackers.Count ? EnumCaptureDirection.Still : EnumCaptureDirection.Claim);
-                    Api.Logger.Debug("Def: {0}, Atk: {1}, Dir: {2}, Perc{3}", defenders.Count, attackers.Count, this.captureDirection, this.CapturedPercent);
+                    Api.Logger.Debug("Def: {0}, Atk: {1}, Dir: {2}, Perc: {3}, capGrp-uid: {4}", defenders.Count, attackers.Count, this.captureDirection, this.CapturedPercent, this.capturedByGroup);
 
 
                     if (this.CapturedPercent == 1f)
@@ -381,18 +371,24 @@ namespace RoCBulwark {
 
                                 this.cellarExpectancy = GameMath.Max(this.cellarExpectancy, 0.2f);
                                 this.Stronghold.Claim(capturedBy);
-                                this.Blockentity.MarkDirty();
+                                if (this.capturedByGroup != -1) this.Stronghold.ClaimGroup(capturedByGroup);
                                 this.Stronghold.contested = false;
                                 this.EndCapture();
+                                this.Blockentity.MarkDirty();
 
                             }
                             else if (this.capturedBy is IServerPlayer serverPlayer)
                             {
                                 this.Stronghold.contested = false;
                                 this.EndCapture();
+                                this.Blockentity.MarkDirty();
                                 //serverPlayer.SendIngameError("stronghold-alreadyclaimed");
                             }
                     }
+                }
+                else
+                {
+
                 }
             }
         }
@@ -404,6 +400,8 @@ namespace RoCBulwark {
                 this.captureDirection = EnumCaptureDirection.Still;
                 this.captureRef = null;
                 this.capturedBy = null;
+                this.capturedByGroup = -1;
+                this.Blockentity.MarkDirty();
             }
         } // void ..
 

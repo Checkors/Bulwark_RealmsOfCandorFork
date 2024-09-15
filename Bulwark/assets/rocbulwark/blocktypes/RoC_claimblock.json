@@ -11,7 +11,7 @@
             "name": "Claimblock",
             "propertiesByType": {
                 "claimblock-homestead": {
-                    "expectancyBonus": 1.5
+                    "expectancyBonus": 2.0
                 },
                 "claimblock-hamlet": {
                     "expectancyBonus": 1.5

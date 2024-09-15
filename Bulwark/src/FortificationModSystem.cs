@@ -5,6 +5,7 @@ using Vintagestory.API.Config;
 using Vintagestory.API.Server;
 using Vintagestory.API.MathTools;
 using Vintagestory.API.Common.Entities;
+using Vintagestory.API.Client;
 
 
 namespace RoCBulwark
@@ -39,100 +40,181 @@ namespace RoCBulwark
 
             base.StartServerSide(api);
             api.Event.CanPlaceOrBreakBlock += this.BlockChangeAttempt;
-            //api.Event.DidPlaceBlock += this.PlaceBlockEvent;
-            //api.Event.DidBreakBlock += this.BreakBlockEvent;
+            //api.Event.DidPlaceBlock += this.PlaceBlockEvent; // Deprecated and removed, caused block duplications.
+            //api.Event.DidBreakBlock += this.BreakBlockEvent; // Deprecated, use case requires stopping block breaking and placement.
             api.Event.PlayerDeath += this.PlayerDeathEvent;
 
+
+            // Baseline Bulwark command registrations
             api.ChatCommands
                 .Create("stronghold")
                 .RequiresPrivilege(Privilege.chat)
                 .BeginSubCommand("name")
                     .WithDescription("Name the claimed area you are in")
                     .WithArgs(api.ChatCommands.Parsers.Word("name"))
-                    .HandleWith(
-                        args =>
-                        {
-
-                            string callerUID = args.Caller.Player.PlayerUID;
-                            if (this.strongholds?.FirstOrDefault(
-                                stronghold => stronghold.PlayerUID == callerUID
-                                && stronghold.Area.Contains(args.Caller.Player.Entity.ServerPos.AsBlockPos),
-                                null
-                            ) is Stronghold area)
-                            {
-
-                                area.Name = args[0].ToString();
-                                this.api.World.BlockAccessor.GetBlockEntity(area.Center).MarkDirty();
-
-                            }
-                            else TextCommandResult.Success(Lang.Get("You're not in a stronghold you claimed"));
-                            return TextCommandResult.Success();
-
-                        } // ..
-                    ) // ..
+                    .HandleWith(new OnCommandDelegate(Cmd_StrongholdName))
                 .EndSubCommand()
                 .BeginSubCommand("league")
                     .WithDescription("Affiliate the claimed area you are in with a group")
                     .WithArgs(api.ChatCommands.Parsers.Word("group name"))
-                    .HandleWith(
-                        args =>
-                        {
-
-                            string callerUID = args.Caller.Player.PlayerUID;
-                            if (this.strongholds?.FirstOrDefault(
-                                stronghold => stronghold.PlayerUID == callerUID
-                                && stronghold.Area.Contains(args.Caller.Player.Entity.ServerPos.AsBlockPos),
-                                null
-                            ) is Stronghold area)
-                            {
-                                if ((this.api as ICoreServerAPI).Groups.GetPlayerGroupByName(args[0].ToString()) is PlayerGroup playerGroup)
-                                {
-
-                                    area.ClaimGroup(playerGroup);
-                                    this.api.World.BlockAccessor.GetBlockEntity(area.Center).MarkDirty();
-
-                                }
-                                else TextCommandResult.Success(Lang.Get("No such group found"));
-                            }
-                            else TextCommandResult.Success(Lang.Get("You're not in a stronghold you claimed"));
-                            return TextCommandResult.Success();
-
-                        } // ..
-                    ) // ..
+                    .HandleWith(new OnCommandDelegate(Cmd_StrongholdLeague)) // ..
                 .EndSubCommand()
                 .BeginSubCommand("stopleague")
                     .WithDescription("Stops the affiliation with a group")
                     .WithArgs(api.ChatCommands.Parsers.Word("group name"))
-                    .HandleWith(
-                        args =>
-                        {
+                    .HandleWith(new OnCommandDelegate(Cmd_StrongholdUnleague))
+                .EndSubCommand()
+            // RoC Bulwark command registrations
+                .BeginSubCommand("capturegroup")
+                    .RequiresPlayer()
+                    .RequiresPrivilege(Privilege.chat)
+                    .BeginSubCommand("set")
+                        .WithArgs(api.ChatCommands.Parsers.Word("groupname"))
+                        .HandleWith(new OnCommandDelegate(Cmd_SetCaptureGroup))
+                    .EndSubCommand()
+                    .BeginSubCommand("show")
+                        .IgnoreAdditionalArgs()
+                        .HandleWith(new OnCommandDelegate(Cmd_GetCaptureGroup));
+           
+        } 
 
-                            string callerUID = args.Caller.Player.PlayerUID;
-                            if (this.strongholds?.FirstOrDefault(
-                                stronghold => stronghold.PlayerUID == callerUID
-                                && stronghold.Area.Contains(args.Caller.Player.Entity.ServerPos.AsBlockPos),
-                                null
-                            ) is Stronghold area)
-                            {
-                                if ((this.api as ICoreServerAPI).Groups.GetPlayerGroupByName(args[0].ToString()) is PlayerGroup playerGroup)
-                                {
+        //===============================
+        // Bulwark Command Handlers
+        //===============================
 
-                                    area.UnclaimGroup();
-                                    this.api.World.BlockAccessor.GetBlockEntity(area.Center).MarkDirty();
+        private TextCommandResult Cmd_StrongholdName(TextCommandCallingArgs args)
+        {
 
-                                }
-                                else TextCommandResult.Success(Lang.Get("No such group found"));
-                            }
-                            else TextCommandResult.Success(Lang.Get("You're not in a stronghold you claimed"));
-                            return TextCommandResult.Success();
+            string callerUID = args.Caller.Player.PlayerUID;
+            if (this.strongholds?.FirstOrDefault(
+                stronghold => stronghold.PlayerUID == callerUID
+                && stronghold.Area.Contains(args.Caller.Player.Entity.ServerPos.AsBlockPos),
+                null
+            ) is Stronghold area)
+            {
 
-                        } // ..
-                    ); // ..
-        } // void ..
+                area.Name = args[0].ToString();
+                this.api.World.BlockAccessor.GetBlockEntity(area.Center).MarkDirty();
+
+            }
+            else TextCommandResult.Success(Lang.GetL(args.LanguageCode,"You're not in a stronghold you claimed"));
+            return TextCommandResult.Success();
+
+        }
+
+        private TextCommandResult Cmd_StrongholdLeague(TextCommandCallingArgs args)
+        {
+
+            string callerUID = args.Caller.Player.PlayerUID;
+            if (this.strongholds?.FirstOrDefault(
+                stronghold => stronghold.PlayerUID == callerUID
+                && stronghold.Area.Contains(args.Caller.Player.Entity.ServerPos.AsBlockPos),
+                null
+            ) is Stronghold area)
+            {
+                if ((this.api as ICoreServerAPI).Groups.GetPlayerGroupByName(args[0].ToString()) is PlayerGroup playerGroup)
+                {
+
+                    area.ClaimGroup(playerGroup);
+                    this.api.World.BlockAccessor.GetBlockEntity(area.Center).MarkDirty();
+
+                }
+                else TextCommandResult.Success(Lang.GetL(args.LanguageCode,"No such group found"));
+            }
+            else TextCommandResult.Success(Lang.GetL(args.LanguageCode,"You're not in a stronghold you claimed"));
+            return TextCommandResult.Success();
+
+        }
+
+        private TextCommandResult Cmd_StrongholdUnleague(TextCommandCallingArgs args)
+        {
+
+            string callerUID = args.Caller.Player.PlayerUID;
+            if (this.strongholds?.FirstOrDefault(
+                stronghold => stronghold.PlayerUID == callerUID
+                && stronghold.Area.Contains(args.Caller.Player.Entity.ServerPos.AsBlockPos),
+                null
+            ) is Stronghold area)
+            {
+                if ((this.api as ICoreServerAPI).Groups.GetPlayerGroupByName(args[0].ToString()) is PlayerGroup playerGroup)
+                {
+
+                    area.UnclaimGroup();
+                    this.api.World.BlockAccessor.GetBlockEntity(area.Center).MarkDirty();
+
+                }
+                else TextCommandResult.Success(Lang.GetL(args.LanguageCode,"No such group found"));
+            }
+            else TextCommandResult.Success(Lang.GetL(args.LanguageCode,"You're not in a stronghold you claimed"));
+            return TextCommandResult.Success();
+
+        }
+
+        //===============================
+        // RoC Command Handlers
+        //===============================
+
+        // Show Claim Zones, (WIP)
+        private TextCommandResult Cmd_ShowClaimAreas(TextCommandCallingArgs args)
+        {
+            if (args.Caller == null)
+            {
+                return TextCommandResult.Error("No Player");
+            }
+
+            
+            return TextCommandResult.Success();
+            //return TextCommandResult.Error("Fucked");
+        }
+
+        // Set Capture Group. Used to set attacker group when capturing control point.
+        private TextCommandResult Cmd_SetCaptureGroup(TextCommandCallingArgs args)
+        {
+            ICoreServerAPI sapi = api as ICoreServerAPI;
+            string groupName = (string)args[0];
+
+            sapi.Logger.Debug("ARGS: {0}, Type:{1}, gname: {2}", args[0], args[0].GetType(), groupName);
+
+            if (groupName != null)
+            {
+                PlayerGroup mainGroup = sapi.Groups.GetPlayerGroupByName(groupName);
+
+                if (mainGroup == null) return TextCommandResult.Error("RoCBulwark:capturegroup-nosuchgroup"); // No such group retrieved
+
+                if (args.Caller.Player.GetGroup(mainGroup.Uid) != null) {
+
+                    if (!sapi.PlayerData.PlayerDataByUid[args.Caller.Player.PlayerUID].CustomPlayerData.TryAdd("CaptureGroup", mainGroup.Uid.ToString()))
+                    {
+                        sapi.PlayerData.PlayerDataByUid[args.Caller.Player.PlayerUID].CustomPlayerData["CaptureGroup"] = mainGroup.Uid.ToString();
+                    }
+                    return TextCommandResult.Success(Lang.GetL(args.LanguageCode, "RoCBulwark:capturegroup-setsuccess", mainGroup.Name)); // Success state
+                }
+                else return TextCommandResult.Error(Lang.GetL(args.LanguageCode, "RoCBulwark:capturegroup-notingroup", groupName)); // No in requested group
+
+            }
+            else return TextCommandResult.Error("Null group name, debug error, contact dev"); //Args nulled out, somehow
+            
+
+        }
+
+        // Set Capture Group. Used to set attacker group when capturing control point.
+        private TextCommandResult Cmd_GetCaptureGroup(TextCommandCallingArgs args)
+        {
+            ICoreServerAPI sapi = api as ICoreServerAPI;
+            string getGroupUID;
+            if (sapi.PlayerData.PlayerDataByUid[args.Caller.Player.PlayerUID].CustomPlayerData.TryGetValue("CaptureGroup", out getGroupUID))
+            {
+                if (int.Parse(getGroupUID) > 0) return TextCommandResult.Success(Lang.GetL(args.LanguageCode, "RoCBulwark:capturegroup-current", sapi.Groups.PlayerGroupsById[int.Parse(getGroupUID)].Name));
+                else return TextCommandResult.Error(Lang.GetL(args.LanguageCode, "RoCBulwark:capturegroup-nosetgroup")); //unset group.
+            }
+            else return TextCommandResult.Error(Lang.GetL(args.LanguageCode, "RoCBulwark:capturegroup-nosetgroup")); //Never set group
+
+
+        }
 
 
         //===============================
-        // I M P L E M E N T A T I O N S
+        // Event Handlers
         //===============================
         private bool BlockChangeAttempt(IServerPlayer byPlayer, BlockSelection blockSel, out string claimant)
         {
@@ -141,69 +223,26 @@ namespace RoCBulwark
             if (blockSel != null)
             {
                 string blockname = api.World.BlockAccessor.GetBlock(blockSel.Position).GetPlacedBlockName(api.World, blockSel.Position);
-                api.Logger.Debug("[RoCBulwark_BCA] {0} attempted place/remove {1}, at position {2}", byPlayer.PlayerName.ToString(), blockname, blockSel.Position.ToString());
+                //api.Logger.Debug("[RoCBulwark_BCA] {0} attempted place/remove {1}, at position {2}", byPlayer.PlayerName.ToString(), blockname, blockSel.Position.ToString());
                 if (!(this.HasPrivilege(byPlayer, blockSel, out _) || byPlayer.WorldData.CurrentGameMode == EnumGameMode.Creative))
                 {
-                    api.Logger.Debug("No Access");
-                    claimant = Lang.Get(byPlayer.LanguageCode,"stronghold-noaccess");
+                    //api.Logger.Debug("No Access");
+                    claimant = Lang.GetL(byPlayer.LanguageCode, "RoCBulwark:stronghold-noaccess");
                     return false;
                 }
                 else
                 {
-                    api.Logger.Debug("Access");
+                    //api.Logger.Debug("Access");
                     claimant = null;
                     return true;
                 }
 
+            } else
+            {
+                claimant = "Null selection";
+                return false;
             }
-            return true;
         }
-
-
-
-        /*private void PlaceBlockEvent(
-            IServerPlayer byPlayer,
-            int oldblockId,
-            BlockSelection blockSel,
-            ItemStack withItemStack
-        ) {
-
-            if (blockSel    != null
-                && byPlayer != null
-                && !(withItemStack?.Collectible.Attributes?["siegeEquipment"]?.AsBool() ?? false)
-                && !this.HasPrivilege(byPlayer, blockSel, out _)
-            ) {
-
-                byPlayer.InventoryManager.ActiveHotbarSlot.Itemstack = withItemStack;
-                byPlayer.InventoryManager.ActiveHotbarSlot.MarkDirty();
-                byPlayer.Entity.World.BlockAccessor.SetBlock(oldblockId, blockSel.Position);
-                byPlayer.SendIngameError("stronghold-nobuildprivilege");
-
-            } // if ..
-        } // void ..*/
-
-
-        /*private void BreakBlockEvent(
-            IServerPlayer byPlayer,
-            int oldblockId,
-            BlockSelection blockSel
-        ) {
-
-            if (blockSel    != null
-                && byPlayer != null
-                && !this.HasPrivilege(byPlayer, blockSel, out Stronghold stronghold)
-            ) {
-                if (byPlayer.Entity.World.Calendar.TotalHours - byPlayer.Entity.WatchedAttributes.GetDouble("strongholdBreakWarning") < 1) {
-                    stronghold.IncreaseSiegeIntensity(0.5f);
-                } else {
-
-                    byPlayer.Entity.WatchedAttributes.SetDouble("strongholdBreakWarning", byPlayer.Entity.World.Calendar.TotalHours);
-                    byPlayer.SendIngameError("stronghold-nobreakprivilege-warning");
-
-                } // if ..
-            } // if ..
-        } // void ..*/
-
 
         private void PlayerDeathEvent(
             IServerPlayer forPlayer,
@@ -234,6 +273,9 @@ namespace RoCBulwark
             } // if ..
         } // void ..
 
+        //===============================
+        // Stronghold Handlers
+        //===============================
 
         public bool TryRegisterStronghold(Stronghold stronghold)
         {

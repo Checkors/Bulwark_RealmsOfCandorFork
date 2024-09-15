@@ -32,17 +32,11 @@ namespace RoCBulwark {
             public override void OnLoaded(
                 ICoreAPI api) {
                 base.OnLoaded(api);
-                /*if (api.Side == EnumAppSide.Client)
-                    this.bannerStacks = ObjectCacheUtil.GetOrCreate(api, "bannerStacks", delegate {
-
-                        List<ItemStack> bannerStacks = new ();
-                        Item[] banners = api.World.SearchItems(new AssetLocation("cloth-*"));
-                        
-                        foreach (Item banner in banners)
-                            bannerStacks.AddRange(banner.GetHandBookStacks(api as ICoreClientAPI));
-
-                        return bannerStacks.ToArray();
-                    }); // ..*/
+            if (api.Side == EnumAppSide.Client) {
+                
+                ICoreClientAPI capi = api as ICoreClientAPI;
+                
+                    }; // ..
             } // void ..
 
 
